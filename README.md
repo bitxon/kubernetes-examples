@@ -1,11 +1,7 @@
 ## Setup Minikube
 ```shell
-minikube start
-minikube addons enable ingress
-minikube addons enable ingress-dns
+minikube start --addons=ingress,ingress-dns
 kubectl get pods -n ingress-nginx
-minikube tunnel
-# Check terminal during testing - it may require some actions/confirmations
 ```
 
 ## Setup Application
@@ -13,16 +9,17 @@ minikube tunnel
 skaffold dev
 ```
 
-## Test 
+## Tunnel for testing
 ```shell
-curl --resolve "application-ingress.info:80:127.0.0.1" -i http://application-ingress.info/hello
+minikube tunnel
+# Check terminal during testing - it may require some actions/confirmations
 ```
 
-
+## Test 
 ```shell
-# in case of error like 'admission webhook "validate.nginx.ingress.kubernetes.io" denied the request'
-kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission
+curl -m 3 --resolve "application-ingress.info:80:127.0.0.1" -i http://application-ingress.info/hello
 ```
 
 ## Links
-https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#mirror
+[Nginx Traffic Mirror](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#mirror)\
+[Ingress Minikube](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/)

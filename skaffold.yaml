@@ -1,4 +1,4 @@
-apiVersion: skaffold/v4beta4
+apiVersion: skaffold/v4beta8
 kind: Config
 metadata:
   name: app
@@ -6,18 +6,9 @@ build:
   artifacts:
     - image: bitxon/app
       docker:
-        dockerfile: Dockerfile
+        dockerfile: Dockerfile.js
 manifests:
   rawYaml:
     - k8s/app-service.yaml
     - k8s/app-deployment.yaml
     - k8s/app-ingress.yaml
-#portForward:
-#  - resourceType: service
-#    resourceName: application-service-blue
-#    port: 8080
-#    localPort: 8080
-#  - resourceType: service
-#    resourceName: application-service-green
-#    port: 8080
-#    localPort: 8090
