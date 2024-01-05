@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: application-cronjob
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: application-cronjob-container
+              image: buildpack-deps:20.04-curl
+              imagePullPolicy: IfNotPresent
+              args:
+                - /bin/sh
+                - -ec
+                - curl http://application-service:8080/hello
+          restartPolicy: Never
