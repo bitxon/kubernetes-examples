@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta8
+kind: Config
+metadata:
+  name: app
+build:
+  artifacts:
+    - image: bitxon/app
+      docker:
+        dockerfile: Dockerfile.js
+        buildArgs:
+          FILE: auth.js
+    - image: bitxon/auth
+      docker:
+        dockerfile: Dockerfile.js
+        buildArgs:
+          FILE: server.js
+manifests:
+  rawYaml:
+    - k8s/auth-service.yaml
+    - k8s/auth-deployment.yaml
+    - k8s/app-service.yaml
+    - k8s/app-deployment.yaml
+    - k8s/app-ingress.yaml
