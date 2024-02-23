@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: application
+  template:
+    metadata:
+      labels:
+        app: application
+    spec:
+      containers:
+        - name: application
+          image: bitxon/app
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_NAME
+              value: application
+            - name: APP_HEALTH_DELAY
+              value: "19000"
+          startupProbe:
+            initialDelaySeconds: 10 # 'initial check' will be after 10 seconds (Not counted as failure)
+            periodSeconds: 5        # first check will be after 10 + 5 = 15, second check 10 + 5 + 5 = 20
+            failureThreshold: 4     # last check will be after 10 + (5 * 4) = 30
+            httpGet:
+              path: /management/health/startup # in real world, this path should be equal to 'livenessProbe'
+              port: 8080
+          livenessProbe:
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 2
+            httpGet:
+              path: /management/health/liveness
+              port: 8080
+          readinessProbe:
+            initialDelaySeconds: 0
+            failureThreshold: 1
+            periodSeconds: 3
+            httpGet:
+              path: /management/health/readiness
+              port: 8080
