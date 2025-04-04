@@ -1,0 +1,54 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: app
+build:
+  artifacts:
+    - image: bitxon/app
+      docker:
+        dockerfile: Dockerfile.js
+manifests:
+  rawYaml:
+    - k8s/app/app-service.yaml
+    - k8s/app/app-deployment.yaml
+    - k8s/app/app-cronjob.yaml
+    - k8s/monitoring/namespace.yaml
+    - k8s/monitoring/grafana-sidecar-datasources-config.yaml
+    - k8s/monitoring/grafana-sidecar-dashboard-config.yaml
+deploy:
+  helm:
+    releases:
+      - name: prometheus
+        remoteChart: prometheus
+        repo: https://prometheus-community.github.io/helm-charts
+        namespace: monitoring
+        createNamespace: true
+        setValues:
+          alertmanager.enabled: false
+      - name: grafana
+        remoteChart: grafana
+        repo: https://grafana.github.io/helm-charts
+        namespace: monitoring
+        createNamespace: true
+        setValues:
+          sidecar.datasources.enabled: true
+          sidecar.dashboards.enabled: true
+
+portForward:
+  - resourceName: application-service
+    resourceType: service
+    namespace: default
+    port: 8080
+    localPort: 8080
+  - resourceName: prometheus-server
+    resourceType: service
+    namespace: monitoring
+    port: 80
+    localPort: 9090
+  - resourceName: grafana
+    resourceType: service
+    namespace: monitoring
+    port: 80
+    localPort: 3000
+
+

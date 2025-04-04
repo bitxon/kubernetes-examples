@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: application-cronjob
+spec:
+  schedule: "*/1 * * * *"             # Run Every 1 minute
+  concurrencyPolicy: Forbid           # Prevents the new job from starting while the existing is running
+  successfulJobsHistoryLimit: 3       # Keeps the specified number of successfully completed jobs
+  failedJobsHistoryLimit: 3           # Keeps the specified number of failed jobs
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          activeDeadlineSeconds: 30   # Mark Job as Failed with the reason 'DeadlineExceeded'
+          containers:
+            - name: application-cronjob-container
+              image: buildpack-deps:24.04-curl
+              imagePullPolicy: IfNotPresent
+              args:
+                - /bin/sh
+                - -ec
+                - echo 'Running' &&  for n in {1..6}; do curl http://application-service:8080/hello; done && echo $'\nDone\n'
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 100Mi
+                limits:
+                  cpu: 100m # Do not use cpu limit in production
+                  memory: 200Mi
+          restartPolicy: Never
