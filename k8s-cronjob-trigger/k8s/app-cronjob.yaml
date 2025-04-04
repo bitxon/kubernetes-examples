@@ -3,17 +3,21 @@ kind: CronJob
 metadata:
   name: application-cronjob
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "*/1 * * * *"             # Run Every 1 minute
+  concurrencyPolicy: Forbid           # Prevents the new job from starting while the existing is running
+  successfulJobsHistoryLimit: 10      # Keeps the specified number of successfully completed jobs
+  failedJobsHistoryLimit: 10          # Keeps the specified number of failed jobs
   jobTemplate:
     spec:
       template:
         spec:
+          activeDeadlineSeconds: 10   # Mark Job as Failed with the reason 'DeadlineExceeded'
           containers:
             - name: application-cronjob-container
-              image: buildpack-deps:20.04-curl
+              image: buildpack-deps:24.04-curl
               imagePullPolicy: IfNotPresent
               args:
                 - /bin/sh
                 - -ec
-                - curl http://application-service:8080/hello
+                - echo 'Running' && for n in `seq 1 9`; do curl -sS http://application-service:8080/hello; done && echo $'\nDone\n' && exit 0
           restartPolicy: Never

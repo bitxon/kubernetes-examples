@@ -19,7 +19,7 @@ spec:
               args:
                 - /bin/sh
                 - -ec
-                - echo 'Running' &&  for n in {1..6}; do curl http://application-service:8080/hello; done && echo $'\nDone\n'
+                - echo 'Running' &&  for n in `seq 1 9`; do curl http://application-service:8080/hello; done && echo $'\nDone\n'
               resources:
                 requests:
                   cpu: 50m
